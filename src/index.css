@@ -1,0 +1,84 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600&family=Patrick+Hand&display=swap');
+@import "tailwindcss";
+
+@theme {
+    --font-hand: 'Patrick Hand', cursive;
+    --font-sans: 'Outfit', sans-serif;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: #fce7f3;
+    /* pink-100 fallback */
+    overflow: hidden;
+    /* Prevent scrolling during animations */
+}
+
+/* Custom Envelope Styles */
+.envelope-flap {
+    clip-path: polygon(0 0, 50% 55%, 100% 0);
+    transform-origin: top;
+}
+
+.envelope-body {
+    clip-path: polygon(0 0, 50% 50%, 100% 0, 100% 100%, 0 100%);
+}
+
+.clip-path-envelope {
+    clip-path: polygon(0 0, 50% 50%, 100% 0, 100% 100%, 0 100%);
+}
+
+.heart-beat {
+    animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+    0% {
+        transform: scale(1);
+    }
+
+    15% {
+        transform: scale(1.15);
+    }
+
+    30% {
+        transform: scale(1);
+    }
+
+    45% {
+        transform: scale(1.15);
+    }
+
+    60% {
+        transform: scale(1);
+    }
+}
+
+@keyframes look-around {
+
+    0%,
+    15%,
+    85%,
+    100% {
+        transform: translate(0, 0) scaleY(1);
+    }
+
+    10%,
+    90% {
+        transform: translate(0, 0) scaleY(0.1);
+    }
+
+    30%,
+    45% {
+        transform: translate(-4px, 0) scaleY(1);
+    }
+
+    55%,
+    70% {
+        transform: translate(4px, 0) scaleY(1);
+    }
+}
+
+.animate-look {
+    animation: look-around 5s ease-in-out infinite;
+}
