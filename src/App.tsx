@@ -11,6 +11,65 @@ function App() {
   const [letterVisible, setLetterVisible] = useState(false);
   const [questionVisible, setQuestionVisible] = useState(false);
   const [accepted, setAccepted] = useState(false);
+  const [noCount, setNoCount] = useState(0);
+  const [photoIndex, setPhotoIndex] = useState(0);
+
+  // PLACEHOLDER: Replace these with your own image imports or URLs!
+  const photos = [
+    celebrationGif,
+    celebrationGif, // Add different photos here
+    celebrationGif,
+    celebrationGif,
+  ];
+
+  const photoRef = useRef<HTMLDivElement>(null);
+
+  // Auto-slide photos
+  useEffect(() => {
+    if (accepted) {
+      const interval = setInterval(() => {
+        setPhotoIndex((prev) => (prev + 1) % photos.length);
+      }, 2000); // Change every 2 seconds
+      return () => clearInterval(interval);
+    }
+  }, [accepted]);
+
+  // Animate photo change
+  useGSAP(() => {
+    if (accepted && photoRef.current) {
+      gsap.fromTo(photoRef.current,
+        { rotation: (Math.random() - 0.5) * 15, scale: 0.95 },
+        {
+          rotation: (Math.random() - 0.5) * 10,
+          scale: 1,
+          duration: 0.5,
+          ease: "back.out(1.5)"
+        }
+      );
+    }
+  }, { dependencies: [photoIndex, accepted], scope: containerRef });
+
+  const getNoButtonText = () => {
+    const phrases = [
+      "No",
+      "Talaga ba?",
+      "Really my Nig?",
+      "WAW NAMAN TALGA!",
+      "Isa Pa!",
+      "Tsk Kulet?",
+      "Sige Lang",
+      "Balaka",
+      "Ikaw din?",
+      "Choosy yarn",
+      "K!",
+      "Mumuro kana!",
+      "Ayaw Pa din?",
+      "If that`s what you want",
+      "Wag na Lang!",
+      "HUHU ;(",
+    ];
+    return phrases[Math.min(noCount, phrases.length - 1)];
+  };
 
   const containerRef = useRef<HTMLDivElement>(null);
   const letterRef = useRef<HTMLDivElement>(null);
@@ -73,23 +132,36 @@ function App() {
         {
           y: 0,
           opacity: 1,
-          stagger: 1.5, // Increased stagger for better readability
-          duration: 1.0, // Slightly slower fade in
+          stagger: 1.5,
+          duration: 1.0,
           ease: 'power2.out',
         }
         , '-=0.4');
 
-      // Add a pause before showing the question
-      tl.to({}, { duration: 2.0 }); // 2 second pause after text is fully revealed
-      tl.call(() => setQuestionVisible(true));
+      // Reveal the continue button at the end
+      tl.fromTo('.continue-btn',
+        { scale: 0, opacity: 0 },
+        {
+          scale: 1,
+          opacity: 1,
+          duration: 0.5,
+          ease: 'back.out(1.7)',
+          delay: 1
+        }
+      );
     }
-  }, [letterVisible]);
+  }, [letterVisible, questionVisible]);
 
   const handleOpenEnvelope = () => {
     setEnvelopeOpen(true);
   };
 
   const handleNoHover = () => {
+    setNoCount(noCount + 1);
+    handleNoInteraction();
+  };
+
+  const handleNoInteraction = () => {
     if (noBtnRef.current && yesBtnRef.current) {
       // Mobile-friendly swap or random move
       const xRange = window.innerWidth * 0.3; // 30% of screen width
@@ -213,8 +285,8 @@ function App() {
               <div className="absolute inset-0 opacity-10 pointer-events-none bg-[linear-gradient(#e5e7eb_1px,transparent_1px)] bg-[length:100%_2rem]"></div>
 
               {!questionVisible ? (
-                <div className="letter-text font-hand text-2xl md:text-3xl text-gray-700 space-y-8 flex-grow leading-loose relative z-10">
-                  <p className="font-bold text-pink-500">Dear Trizia,</p>
+                <div className="letter-text font-hand text-2xl md:text-3xl text-gray-700 space-y-6 flex-grow leading-relaxed relative z-10">
+                  <p className="font-bold text-pink-500">Dear Bembi,</p>
                   <p>
                     I’ve been wanting to tell you this for a while.
                     Every time I see you, my world gets a little brighter.
@@ -225,6 +297,15 @@ function App() {
                   <p>
                     So, I have an important question...
                   </p>
+
+                  <div className="flex justify-center mt-8">
+                    <button
+                      className="continue-btn opacity-0 px-6 py-2 bg-pink-400 text-white rounded-full font-sans font-bold shadow-md hover:bg-pink-500 transition-colors animate-pulse"
+                      onClick={() => setQuestionVisible(true)}
+                    >
+                      Tap to continue →
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="mt-8 pt-6 relative z-10 flex-grow flex flex-col justify-center animate-in fade-in zoom-in duration-500">
@@ -235,6 +316,7 @@ function App() {
                     <button
                       ref={yesBtnRef}
                       className="px-8 py-3 bg-pink-500 hover:bg-pink-600 text-white rounded-full font-bold shadow-pink-200 shadow-xl transform transition-all hover:scale-110 active:scale-95 font-sans text-xl z-20"
+                      style={{ fontSize: `${noCount * 5 + 20}px` }}
                       onClick={handleYesClick}
                     >
                       Yes!
@@ -242,12 +324,12 @@ function App() {
 
                     <button
                       ref={noBtnRef}
-                      className="px-8 py-3 bg-white text-gray-500 border-2 border-gray-200 rounded-full font-bold shadow-sm font-sans text-xl transition-all cursor-pointer"
+                      className="px-8 py-3 bg-white text-gray-500 border-2 border-gray-200 rounded-full font-bold shadow-sm font-sans text-xl transition-all cursor-pointer z-50"
                       onMouseEnter={handleNoHover}
                       onTouchStart={handleNoHover}
                       onClick={(e) => { e.preventDefault(); handleNoHover(); }}
                     >
-                      No
+                      {noCount === 0 ? "No" : getNoButtonText()}
                     </button>
                   </div>
                 </div>
@@ -258,12 +340,27 @@ function App() {
       ) : (
         /* Celebration Screen */
         <div className="text-center space-y-6 z-50 p-8 max-w-md mx-4 animate-in fade-in zoom-in duration-700">
-          <div className="flex justify-center mb-4">
-            <img
-              src={celebrationGif}
-              alt="Celebration"
-              className="w-64 h-64 object-contain filter drop-shadow-xl "
-            />
+          <div className="flex justify-center mb-8 relative z-10">
+            <div
+              ref={photoRef}
+              className="bg-white p-4 pb-16 shadow-2xl transform rotate-2 transition-all duration-300 border border-gray-100 w-64 h-80 relative"
+            >
+              <div className="w-full h-full bg-gray-100 overflow-hidden relative">
+                <img
+                  src={photos[photoIndex]}
+                  alt="Love Memory"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="absolute bottom-4 left-0 right-0 text-center">
+                <p className="font-hand text-gray-500 text-xl font-bold opacity-80 rotate-1">
+                  Caught in 4K 📸
+                </p>
+              </div>
+
+              {/* Tape effect */}
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-8 bg-pink-200/50 rotate-3 backdrop-blur-sm"></div>
+            </div>
           </div>
           <h1 className="text-5xl md:text-6xl font-bold text-pink-600 font-sans drop-shadow-sm">Yay!</h1>
           <p className="text-3xl md:text-4xl text-pink-500 font-hand leading-relaxed">
@@ -272,6 +369,49 @@ function App() {
           <p className="text-xl text-gray-500 font-sans bg-white/50 py-2 px-4 rounded-full inline-block mt-4">
             See you soon! 💘
           </p>
+
+          <div className="bg-white/80 p-6 rounded-lg shadow-xl border-dashed border-2 border-pink-300 transform rotate-2 max-w-sm mx-auto mt-12 animate-in slide-in-from-bottom-10 fade-in duration-1000 delay-500 relative">
+            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-pink-100 px-3 py-1 rounded-full text-xs font-bold text-pink-500 uppercase tracking-widest border border-pink-200">
+              Official Receipt
+            </div>
+
+            <div className="space-y-4 font-mono text-sm text-gray-600 text-left">
+              <div className="flex justify-between border-b border-gray-200 pb-2">
+                <span>DATE</span>
+                <span>{new Date().toLocaleDateString()}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span>1x Valentine Date</span>
+                <span>Priceless</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Unli Food/Kikiam</span>
+                <span>Included</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Hugs & Kisses</span>
+                <span>∞</span>
+              </div>
+
+              <div className="border-t-2 border-gray-300 pt-2 flex justify-between font-bold text-lg text-pink-600">
+                <span>TOTAL</span>
+                <span>FOREVER</span>
+              </div>
+
+              <div className="text-[10px] text-gray-400 text-center pt-4 italic">
+                * No returns, no exchanges, and absolutely no refunds!
+                <br />
+                (Wala ng bawian to ah!)
+              </div>
+
+              <div className="mt-4 text-center">
+                <div className="inline-block border-2 border-red-400 text-red-400 font-bold px-4 py-1 rounded transform -rotate-12 opacity-80 uppercase text-xs tracking-widest">
+                  Paid with Love
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
