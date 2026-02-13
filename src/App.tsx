@@ -2,9 +2,11 @@ import { useState, useRef, useEffect } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import confetti from 'canvas-confetti';
-import celebrationGif from './assets/200w.gif';
+
 
 gsap.registerPlugin(useGSAP);
+
+
 
 function App() {
   const [envelopeOpen, setEnvelopeOpen] = useState(false);
@@ -14,15 +16,30 @@ function App() {
   const [noCount, setNoCount] = useState(0);
   const [photoIndex, setPhotoIndex] = useState(0);
 
-  // PLACEHOLDER: Replace these with your own image imports or URLs!
   const photos = [
-    celebrationGif,
-    celebrationGif, // Add different photos here
-    celebrationGif,
-    celebrationGif,
+    '/images/image_1.jfif',
+    '/images/image_2.jfif',
+    '/images/image_3.jfif',
+    '/images/image_4.jfif',
+    '/images/image_5.jfif',
+    '/images/image_6.jfif',
+    '/images/Image_7.jfif',
+    '/images/image_8.jfif',
+    '/images/iamge_9.jfif',
+    '/images/image_10.jfif',
+    '/images/image_11.jfif',
+    '/images/image_12.jfif',
+    '/images/image_13.jfif',
+    '/images/iamge_14.jfif',
+    '/images/image_15.jfif',
   ];
 
+
   const photoRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const letterRef = useRef<HTMLDivElement>(null);
+  const noBtnRef = useRef<HTMLButtonElement>(null);
+  const yesBtnRef = useRef<HTMLButtonElement>(null);
 
   // Auto-slide photos
   useEffect(() => {
@@ -32,7 +49,7 @@ function App() {
       }, 2000); // Change every 2 seconds
       return () => clearInterval(interval);
     }
-  }, [accepted]);
+  }, [accepted, photos.length]);
 
   // Animate photo change
   useGSAP(() => {
@@ -71,10 +88,7 @@ function App() {
     return phrases[Math.min(noCount, phrases.length - 1)];
   };
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const letterRef = useRef<HTMLDivElement>(null);
-  const noBtnRef = useRef<HTMLButtonElement>(null);
-  const yesBtnRef = useRef<HTMLButtonElement>(null);
+
 
   // Animation for opening the envelope
   useGSAP(() => {
@@ -353,6 +367,9 @@ function App() {
                 />
               </div>
               <div className="absolute bottom-4 left-0 right-0 text-center">
+                <p className="font-hand text-gray-400 text-sm mb-1">
+                  {photoIndex + 1} of {photos.length}
+                </p>
                 <p className="font-hand text-gray-500 text-xl font-bold opacity-80 rotate-1">
                   Caught in 4K 📸
                 </p>
